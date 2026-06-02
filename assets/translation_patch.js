@@ -3520,24 +3520,46 @@ function normalizeText(str) {
     .trim();
 }
 
+function escapeHtml(str) {
+  return String(str)
+    .replaceAll("&", "&amp;")
+    .replaceAll("<", "&lt;")
+    .replaceAll(">", "&gt;")
+    .replaceAll('"', "&quot;")
+    .replaceAll("'", "&#039;");
+}
+
+// 把原本資料裡的 OO 標記起來，之後只讓 OO 對應的位置變粗體 더비
+function markOOAsDerby(str) {
+  return String(str).replaceAll("OO", "__OO_STRONG__");
+}
+
+// 最後輸出 HTML：只有 __OO_STRONG__ 會變成粗體 더비
+function renderTextWithOO(str) {
+  return escapeHtml(str)
+    .replaceAll("__OO_STRONG__", "<strong>더비</strong>");
+}
+
 const normalizedTranslations = {};
 
 for (const [key, value] of Object.entries(translations)) {
-  const k = normalizeText(key);
+  const originalKey = normalizeText(key);
+  const originalValue = String(value);
 
-  // 原本 OO 版本
-  normalizedTranslations[k] = value;
+  // 1. 原本 OO 版本
+  // 例如：난 OO가 좋아
+  normalizedTranslations[originalKey] = markOOAsDerby(originalValue);
 
-  // 讓畫面上的 더비 也能對到翻譯表的 OO
-  const derbyKey = normalizeText(k.replaceAll("OO", "더비"));
-  const derbyValue = String(value).replaceAll("OO", "더비");
-
-  normalizedTranslations[derbyKey] = derbyValue;
+  // 2. 畫面上 OO 會被網站變成 더비，所以也建立 더비 版本的 key
+  // 例如：난 더비가 좋아
+  const derbyKey = normalizeText(originalKey.replaceAll("OO", "더비"));
+  normalizedTranslations[derbyKey] = markOOAsDerby(originalValue);
 }
 
 function getOriginalText(p) {
   const origin = p.querySelector(".origin-text");
   if (origin) return origin.innerText;
+
   return p.innerText;
 }
 
@@ -3547,26 +3569,40 @@ function addTranslations() {
     if (!original) return;
 
     const key1 = original;
+
+    // 畫面如果是 더비，反查 OO 版本
     const key2 = normalizeText(original.replaceAll("더비", "OO"));
 
     const zh =
       normalizedTranslations[key1] ||
       normalizedTranslations[key2];
 
-    // 沒找到翻譯就不要標記，不然之後也不會再嘗試
+    // 沒找到翻譯就不要標記，避免之後永遠不再翻
     if (!zh) return;
 
+    // 同一段已經翻過就跳過
     if (p.dataset.originalText === original) return;
 
     p.dataset.originalText = original;
+    p.classList.add("has-translation");
+
+    let displayOriginal = original;
+
+    // 如果畫面上的 더비 是由 OO 變來的，就只讓那個位置變粗體
+    if (key2 !== key1 && normalizedTranslations[key2]) {
+      displayOriginal = markOOAsDerby(key2);
+    } else {
+      displayOriginal = markOOAsDerby(original);
+    }
 
     p.innerHTML = `
-      <span class="origin-text">${escapeHtml(original)}</span>
-      <span class="translated-text">${escapeHtml(zh)}</span>
+      <span class="origin-text">${renderTextWithOO(displayOriginal)}</span>
+      <span class="translated-text">${renderTextWithOO(zh)}</span>
     `;
   });
 }
 
+// React 畫面是後產生的，所以要監聽 DOM 變化
 const observer = new MutationObserver(() => {
   requestAnimationFrame(addTranslations);
 });
@@ -3581,19 +3617,3 @@ window.addEventListener("load", addTranslations);
 setTimeout(addTranslations, 500);
 setTimeout(addTranslations, 1500);
 setTimeout(addTranslations, 3000);
-
-function escapeHtml(str) {
-  return String(str)
-    .replaceAll("&", "&amp;")
-    .replaceAll("<", "&lt;")
-    .replaceAll(">", "&gt;")
-    .replaceAll('"', "&quot;")
-    .replaceAll("'", "&#039;");
-}
-
-new MutationObserver(addTranslations).observe(document.body, {
-  childList: true,
-  subtree: true
-});
-
-addTranslations();
