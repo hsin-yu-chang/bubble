@@ -3523,28 +3523,64 @@ function normalizeText(str) {
 const normalizedTranslations = {};
 
 for (const [key, value] of Object.entries(translations)) {
-  normalizedTranslations[normalizeText(key)] = value;
+  const k = normalizeText(key);
+
+  // 原本 OO 版本
+  normalizedTranslations[k] = value;
+
+  // 讓畫面上的 더비 也能對到翻譯表的 OO
+  const derbyKey = normalizeText(k.replaceAll("OO", "더비"));
+  const derbyValue = String(value).replaceAll("OO", "더비");
+
+  normalizedTranslations[derbyKey] = derbyValue;
+}
+
+function getOriginalText(p) {
+  const origin = p.querySelector(".origin-text");
+  if (origin) return origin.innerText;
+  return p.innerText;
 }
 
 function addTranslations() {
   document.querySelectorAll(".bubble p").forEach(p => {
-    if (p.dataset.translated === "1") return;
+    const original = normalizeText(getOriginalText(p));
+    if (!original) return;
 
-    const original = p.innerText.trim();
-    const key = normalizeText(original);
-    const zh = normalizedTranslations[key];
+    const key1 = original;
+    const key2 = normalizeText(original.replaceAll("더비", "OO"));
 
-    if (zh) {
-      p.classList.add("has-translation");
+    const zh =
+      normalizedTranslations[key1] ||
+      normalizedTranslations[key2];
 
-      p.innerHTML =
-        '<span class="origin-text">' + escapeHtml(original) + '</span>' +
-        '<span class="translated-text">' + escapeHtml(zh) + '</span>';
-    }
+    // 沒找到翻譯就不要標記，不然之後也不會再嘗試
+    if (!zh) return;
 
-    p.dataset.translated = "1";
+    if (p.dataset.originalText === original) return;
+
+    p.dataset.originalText = original;
+
+    p.innerHTML = `
+      <span class="origin-text">${escapeHtml(original)}</span>
+      <span class="translated-text">${escapeHtml(zh)}</span>
+    `;
   });
 }
+
+const observer = new MutationObserver(() => {
+  requestAnimationFrame(addTranslations);
+});
+
+observer.observe(document.body, {
+  childList: true,
+  subtree: true,
+  characterData: true
+});
+
+window.addEventListener("load", addTranslations);
+setTimeout(addTranslations, 500);
+setTimeout(addTranslations, 1500);
+setTimeout(addTranslations, 3000);
 
 function escapeHtml(str) {
   return String(str)
