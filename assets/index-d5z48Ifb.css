@@ -25,3 +25,65 @@
   padding: 11px 12.5px !important;
   margin: 0 !important;
 }
+
+.reply-origin-text,
+.reply-zh-text {
+  display: block;
+  color: inherit;
+  font-size: inherit;
+  line-height: inherit;
+  font-weight: inherit;
+  letter-spacing: inherit;
+  white-space: pre-wrap;
+}
+
+.reply-zh-text {
+  margin-top: 2px;
+}
+
+.origin-text,
+.translated-text,
+.reply-origin-text,
+.reply-zh-text {
+  display: block;
+  white-space: pre-wrap;
+}
+
+.translation-divider {
+  display: block;
+  height: 1px;
+
+  /* 這裡控制虛線：6px 線段、8px 空白 */
+  background-image: repeating-linear-gradient(
+    to right,
+    #ededed 0,
+    #ededed 5px,
+    transparent 5px,
+    transparent 9px
+  );
+
+  margin: 10px -12.5px 12px -12.5px;
+  width: calc(100% + 25px);
+
+  border: 0;
+}
+
+body,
+.bubble,
+.bubble p,
+.origin-text,
+.translated-text,
+.reply-origin-text,
+.reply-zh-text {
+  font-family:
+    "Pretendard Variable",
+    "Pretendard",
+    system-ui,
+    -apple-system,
+    BlinkMacSystemFont,
+    "Segoe UI",
+    "Segoe UI Emoji",
+    "Apple Color Emoji",
+    "Noto Color Emoji",
+    sans-serif;
+}
