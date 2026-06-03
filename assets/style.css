@@ -2885,8 +2885,12 @@ ul::-webkit-scrollbar-track {
 }
 
 /* 替換字 더비：原文 / 翻譯都會吃到 */
-.bubble p strong {
+.bubble p strong * {
   font-weight: 700;
+  color: #f08aa3 !important;
+}
+.bubble p strong * {
+  color: #f08aa3 !important;
 }
 
 body,
