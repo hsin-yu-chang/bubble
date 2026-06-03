@@ -2825,7 +2825,7 @@ ul::-webkit-scrollbar-track {
 .bubble p .origin-text {
   display: block;
   text-align: left;
-
+  font-weight: 500;
 }
 .bubble p .translate-line {
   display: none;
@@ -2838,6 +2838,7 @@ ul::-webkit-scrollbar-track {
   font-size: 14px;
   line-height: 1.4;
   text-align: left;
+  font-weight: 500
 
 }
 .bubble p.has-translation {
@@ -2882,6 +2883,12 @@ ul::-webkit-scrollbar-track {
   border: 0;
 
 }
+
+/* 替換字 더비：原文 / 翻譯都會吃到 */
+.bubble p strong {
+  font-weight: 700;
+}
+
 body,
 .bubble,
 .bubble p,
