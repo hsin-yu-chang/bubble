@@ -3873,6 +3873,8 @@ const translations = {
   "새벽이 아니라": "不是凌晨"
 };
 
+const DERBY_NAME_PATCH = "신유ฅ՞•ﻌ•՞ฅ";
+
 function normalizeText(str) {
   return String(str)
     .replace(/\u00A0/g, " ")
@@ -3896,8 +3898,10 @@ function markOOAsDerby(str) {
 
 // 最後輸出 HTML：只有 __OO_STRONG__ 會變成粗體 더비
 function renderTextWithOO(str) {
+  const safeDerbyName = escapeHtml(DERBY_NAME_PATCH);
+
   return escapeHtml(str)
-    .replaceAll("__OO_STRONG__", "<strong>더비</strong>");
+    .replaceAll("__OO_STRONG__", "<strong>" + safeDerbyName + "</strong>");
 }
 
 const normalizedTranslations = {};
@@ -3912,7 +3916,7 @@ for (const [key, value] of Object.entries(translations)) {
 
   // 2. 畫面上 OO 會被網站變成 더비，所以也建立 더비 版本的 key
   // 例如：난 더비가 좋아
-  const derbyKey = normalizeText(originalKey.replaceAll("OO", "더비"));
+  const derbyKey = normalizeText(originalKey.replaceAll("OO", DERBY_NAME_PATCH));
   normalizedTranslations[derbyKey] = markOOAsDerby(originalValue);
 }
 
@@ -3954,7 +3958,11 @@ function addTranslations() {
     const key1 = original;
 
     // 畫面如果是 더비，反查 OO 版本
-    const key2 = normalizeText(original.replaceAll("더비", "OO"));
+    const key2 = normalizeText(
+      original
+        .replaceAll(DERBY_NAME_PATCH, "OO")
+        .replaceAll("더비", "OO")
+    );
 
     const zh =
       normalizedTranslations[key1] ||
@@ -3967,12 +3975,13 @@ function addTranslations() {
 
     p.dataset.originalText = original;
     p.classList.add("has-translation");
+    p.classList.add("has-translation");
 
     let displayOriginal = rawOriginal;
 
     // 只處理畫面顯示，不要拿 normalize 後的 original 顯示
     if (key2 !== key1 && normalizedTranslations[key2]) {
-      displayOriginal = rawOriginal.replaceAll("더비", "__OO_STRONG__");
+      displayOriginal = rawOriginal.replaceAll(DERBY_NAME_PATCH, "__OO_STRONG__").replaceAll("더비", "__OO_STRONG__");
     } else {
       displayOriginal = rawOriginal.replaceAll("OO", "__OO_STRONG__");
     }
@@ -3997,17 +4006,34 @@ function addTranslations() {
 }
 
 // React 畫面是後產生的，所以要監聽 DOM 變化
-const observer = new MutationObserver(() => {
-  requestAnimationFrame(addTranslations);
-});
+function startTranslationPatch() {
+  if (!document.body) {
+    setTimeout(startTranslationPatch, 100);
+    return;
+  }
 
-observer.observe(document.body, {
-  childList: true,
-  subtree: true,
-  characterData: true
-});
+  console.log("[translation_patch] 啟動成功");
+  console.log("[translation_patch] 翻譯筆數 =", Object.keys(translations).length);
+  console.log("[translation_patch] 目前泡泡數 =", document.querySelectorAll(".bubble p").length);
 
-window.addEventListener("load", addTranslations);
-setTimeout(addTranslations, 500);
-setTimeout(addTranslations, 1500);
-setTimeout(addTranslations, 3000);
+  addTranslations();
+
+  const observer = new MutationObserver(() => {
+    requestAnimationFrame(() => {
+      addTranslations();
+    });
+  });
+
+  observer.observe(document.body, {
+    childList: true,
+    subtree: true,
+    characterData: true
+  });
+
+  setTimeout(addTranslations, 500);
+  setTimeout(addTranslations, 1500);
+  setTimeout(addTranslations, 3000);
+  setTimeout(addTranslations, 5000);
+}
+
+startTranslationPatch();

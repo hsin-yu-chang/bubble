@@ -1,3 +1,4 @@
+const DERBY_NAME = "신유ฅ՞•ﻌ•՞ฅ";
 var C5 = Object.defineProperty;
 var M5 = (a, n, t) =>
   n in a
@@ -44833,7 +44834,7 @@ function j6() {
                         "💕   ",
                         b.jsx("br", {}),
                         "- 애칭은 '",
-                        b.jsx("strong", { children: "더비" }),
+                        b.jsx("strong", { children: DERBY_NAME }),
                         "' 로 설정되어 있습니다. ",
                         b.jsx("br", {}),
                         b.jsx("br", {}),
@@ -54113,7 +54114,7 @@ function Fb() {
             {
               children: [
                 b.jsx("span", { children: v }),
-                w < y.length - 1 && b.jsx("strong", { children: "더비" }),
+                w < y.length - 1 && b.jsx("strong", { children:  DERBY_NAME }),
               ],
             },
             w,
@@ -61389,9 +61390,9 @@ function G_() {
         a.filter((O) => {
           const R = n.toLowerCase(),
             B = O.text,
-            L = B.replace(/OO/g, "더비");
-          return R === "더비"
-            ? B.includes("OO") || L.toLowerCase().includes("더비")
+            L = B.replace(/OO/g, "신유");
+          return R === "신유"
+            ? B.includes("OO") || L.toLowerCase().includes("신유")
             : R === "oo"
               ? B.toLowerCase().includes("OO")
               : B.toLowerCase().includes(R);
@@ -61422,7 +61423,7 @@ function G_() {
             {
               children: [
                 b.jsx("span", { children: V }),
-                K < ie.length - 1 && b.jsx("strong", { children: "더비" }),
+                K < ie.length - 1 && b.jsx("strong", { children: DERBY_NAME }),
               ],
             },
             K,
@@ -61433,16 +61434,16 @@ function G_() {
     return b.jsx(b.Fragment, {
       children: P.map((V, K) =>
         V === "__REPLACED_DERBY__"
-          ? R === "더비"
+          ? R === DERBY_NAME
             ? b.jsx(
                 "mark",
                 {
                   style: { backgroundColor: "#f8d3ce" },
-                  children: b.jsx("strong", { children: "더비" }),
+                  children: b.jsx("strong", { children: DERBY_NAME }),
                 },
                 K,
               )
-            : b.jsx("strong", { children: "더비" }, K)
+            : b.jsx("strong", { children: DERBY_NAME }, K)
           : R && V.toLowerCase() === R.toLowerCase()
             ? b.jsx(
                 "mark",
