@@ -1,0 +1,265 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Fromm Mock Chat</title>
+<style>
+*{box-sizing:border-box}
+body{
+  margin:0;
+  font-family: Arial, "Noto Sans TC", sans-serif;
+  background:#fff;
+}
+.app{
+  max-width:430px;
+  margin:auto;
+  height:100vh;
+  display:flex;
+  flex-direction:column;
+  border:1px solid #ddd;
+}
+.header{
+  height:58px;
+  background:#17181c;
+  color:white;
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  padding:0 18px;
+  font-size:20px;
+}
+.header .name{
+  font-weight:bold;
+}
+.chat{
+  flex:1;
+  overflow-y:auto;
+  padding:18px 14px 90px;
+}
+.msg-row{
+  display:flex;
+  gap:10px;
+  margin-bottom:18px;
+}
+.avatar{
+  width:42px;
+  height:42px;
+  border-radius:50%;
+  background:#2b2d35;
+  flex-shrink:0;
+}
+.artist-name{
+  font-size:13px;
+  color:#888;
+  margin-bottom:4px;
+}
+.bubble{
+  background:#f1f1f3;
+  border-radius:0 18px 18px 18px;
+  padding:13px 16px;
+  max-width:280px;
+  font-size:17px;
+  line-height:1.45;
+  white-space:pre-wrap;
+}
+.quote-box{
+  background:#2b2d35;
+  color:#d6d6d6;
+  border-radius:16px;
+  padding:10px 12px;
+  margin-bottom:10px;
+  border-left:4px solid #111;
+  font-size:14px;
+  line-height:1.4;
+  white-space:pre-wrap;
+}
+.time{
+  font-size:12px;
+  color:#aaa;
+  margin-left:6px;
+  align-self:flex-end;
+}
+.user-row{
+  display:flex;
+  justify-content:flex-end;
+  margin-bottom:18px;
+}
+.user-bubble{
+  background:#2b2d35;
+  color:white;
+  border-radius:18px 0 18px 18px;
+  padding:13px 16px;
+  max-width:280px;
+  font-size:17px;
+  line-height:1.45;
+}
+.input-area{
+  position:fixed;
+  bottom:0;
+  left:50%;
+  transform:translateX(-50%);
+  max-width:430px;
+  width:100%;
+  background:#111216;
+  padding:12px;
+  display:flex;
+  gap:8px;
+}
+input{
+  flex:1;
+  border:none;
+  outline:none;
+  border-radius:24px;
+  padding:13px 16px;
+  background:#333741;
+  color:white;
+  font-size:15px;
+}
+button{
+  border:none;
+  border-radius:22px;
+  padding:0 16px;
+  background:#eee;
+  font-weight:bold;
+}
+.setting-item{
+  padding:24px 0;
+  font-size:22px;
+  border-bottom:1px solid rgba(255,255,255,.08);
+}
+
+
+</style>
+</head>
+<body>
+
+<div class="app">
+  <div class="header">
+    <span>‹</span>
+    <div class="name" id="artistName">선우</div>
+    <span onclick="showSettings()">☰</span>
+  </div>
+
+
+  <div class="chat" id="chat"></div>
+
+  <div class="input-area">
+    <input id="userInput" placeholder="傳送訊息" onkeydown="if(event.key==='Enter')sendUser()">
+    <button onclick="sendUser()">送出</button>
+  </div>
+</div>
+
+<div id="settingsPage" style="display:none;height:100vh;background:#111216;color:white;overflow:auto;">
+
+  <div class="header">
+    <span onclick="showChat()">‹</span>
+    <div class="name">聊天室設定</div>
+    <span></span>
+  </div>
+
+  <div style="padding:30px 24px;">
+
+    <div class="setting-item">照片、影片</div>
+    <div class="setting-item">語音訊息</div>
+    <div class="setting-item">我的暱稱</div>
+    <div class="setting-item">聊天室名稱</div>
+    <div class="setting-item">聊天室背景設定</div>
+    <div class="setting-item">翻譯</div>
+    <div class="setting-item">只查看我收到的回覆</div>
+    <div class="setting-item">接收通知</div>
+    <div class="setting-item">重新整理最近訊息</div>
+    <div class="setting-item">恢復所有訊息</div>
+
+  </div>
+
+</div>
+
+<script>
+const chat = document.getElementById("chat");
+const artistName = "선우";
+
+function nowTime(){
+  const d = new Date();
+  let h = d.getHours();
+  let m = String(d.getMinutes()).padStart(2,"0");
+  const ampm = h >= 12 ? "PM" : "AM";
+  h = h % 12 || 12;
+  return `${ampm} ${h}:${m}`;
+}
+
+function addArtistMessage(item){
+  const text = typeof item === "string" ? item : item.text;
+  const quote = typeof item === "string" ? "" : item.quote;
+
+  const quoteHtml = quote
+    ? `<div class="quote-box">${escapeHtml(quote)}</div>`
+    : "";
+
+  const row = document.createElement("div");
+  row.className = "msg-row";
+  row.innerHTML = `
+    <div class="avatar"></div>
+    <div>
+      <div class="artist-name">${artistName}</div>
+      <div style="display:flex">
+        <div class="bubble">
+          ${quoteHtml}
+          ${escapeHtml(text)}
+        </div>
+        <div class="time">${nowTime()}</div>
+      </div>
+    </div>
+  `;
+  chat.appendChild(row);
+  chat.scrollTop = chat.scrollHeight;
+}
+
+function addUserMessage(text){
+  const row = document.createElement("div");
+  row.className = "user-row";
+  row.innerHTML = `<div class="user-bubble">${escapeHtml(text)}</div>`;
+  chat.appendChild(row);
+  chat.scrollTop = chat.scrollHeight;
+}
+
+function sendUser(){
+  const input = document.getElementById("userInput");
+  if(!input.value.trim()) return;
+
+  addUserMessage(input.value.trim());
+  input.value = "";
+}
+
+
+function escapeHtml(str){
+  return str
+    .replaceAll("&","&amp;")
+    .replaceAll("<","&lt;")
+    .replaceAll(">","&gt;");
+}
+
+// 初始訊息
+addArtistMessage("7번 갑분 반말");
+
+addArtistMessage({
+  quote: "3학년때가 6학년때보다 글씨 잘 씀",
+  text: "어쩔"
+});
+
+addArtistMessage("1번 콘프로스트를 참! 이야\n니라 잡수신다고 적으려다가\n바꾼 거임;");
+
+function showSettings(){
+  document.querySelector(".app").style.display = "none";
+  document.getElementById("settingsPage").style.display = "block";
+}
+
+function showChat(){
+  document.querySelector(".app").style.display = "flex";
+  document.getElementById("settingsPage").style.display = "none";
+}
+
+</script>
+
+</body>
+</html>
