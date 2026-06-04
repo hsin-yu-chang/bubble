@@ -60,19 +60,46 @@ body{
   padding:13px 16px;
   max-width:280px;
   font-size:17px;
+  line-height:1.3;
+  white-space:pre-wrap;
+}
+.reply-wrap{
+  display:flex;
+  align-items:stretch;
+  margin-bottom:10px;
+}
+
+.reply-line{
+  width:4px;
+  background:#24262d;
+  border-radius:10px;
+  margin-right:10px;
+}
+
+.quote-box{
+  background:#24262d;
+  color:#d6d6d6;
+  border-radius:20px;
+  padding:12px 14px;
+  font-size:15px;
   line-height:1.45;
   white-space:pre-wrap;
 }
-.quote-box{
-  background:#2b2d35;
-  color:#d6d6d6;
-  border-radius:16px;
-  padding:10px 12px;
-  margin-bottom:10px;
-  border-left:4px solid #111;
-  font-size:14px;
-  line-height:1.4;
-  white-space:pre-wrap;
+
+.bubble-divider{
+  height:1px;
+  background:rgba(0,0,0,.08);
+  margin:8px 0;
+}
+
+.quote-box .bubble-divider{
+  background:rgba(255,255,255,.08);
+}
+
+.translation-label{
+  margin-top:8px;
+  font-size:13px;
+  color:#8f9199;
 }
 .time{
   font-size:12px;
@@ -190,10 +217,33 @@ function nowTime(){
 
 function addArtistMessage(item){
   const text = typeof item === "string" ? item : item.text;
+  const trans = typeof item === "string" ? "" : item.trans;
+
   const quote = typeof item === "string" ? "" : item.quote;
+  const quoteTrans = typeof item === "string" ? "" : item.quoteTrans;
 
   const quoteHtml = quote
-    ? `<div class="quote-box">${escapeHtml(quote)}</div>`
+    ? `
+      <div class="reply-wrap">
+        <div class="reply-line"></div>
+        <div class="quote-box">
+          <div>${escapeHtml(quote)}</div>
+          ${quoteTrans ? `
+            <div class="bubble-divider"></div>
+            <div>${escapeHtml(quoteTrans)}</div>
+            <div class="translation-label">Translated by Papago</div>
+          ` : ""}
+        </div>
+      </div>
+    `
+    : "";
+
+  const transHtml = trans
+    ? `
+      <div class="bubble-divider"></div>
+      <div>${escapeHtml(trans)}</div>
+      <div class="translation-label">Translated by Papago</div>
+    `
     : "";
 
   const row = document.createElement("div");
@@ -202,15 +252,17 @@ function addArtistMessage(item){
     <div class="avatar"></div>
     <div>
       <div class="artist-name">${artistName}</div>
+      ${quoteHtml}
       <div style="display:flex">
         <div class="bubble">
-          ${quoteHtml}
-          ${escapeHtml(text)}
+          <div>${escapeHtml(text)}</div>
+          ${transHtml}
         </div>
         <div class="time">${nowTime()}</div>
       </div>
     </div>
   `;
+
   chat.appendChild(row);
   chat.scrollTop = chat.scrollHeight;
 }
@@ -243,8 +295,15 @@ function escapeHtml(str){
 addArtistMessage("7번 갑분 반말");
 
 addArtistMessage({
-  quote: "3학년때가 6학년때보다 글씨 잘 씀",
-  text: "어쩔"
+  quote: "abcdefg hijklmn opq rst uvw xyz\n이렇게 나는 보통 사람이지?",
+  quoteTrans: "abcdefg hijklmn opqrst uvw\nxyz, 我是普通人。？",
+  text: "아하 요렇게 하는 사람 있음?",
+  trans: "啊哈，有這樣做的人嗎？"
+});
+
+addArtistMessage({
+  text: "7번 갑분 반말",
+  trans: "7號 突然平語"
 });
 
 addArtistMessage("1번 콘프로스트를 참! 이야\n니라 잡수신다고 적으려다가\n바꾼 거임;");

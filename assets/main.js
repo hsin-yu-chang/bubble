@@ -1,4 +1,4 @@
-const DERBY_NAME = "신유";
+const DERBY_NAME = "yuki";
 var C5 = Object.defineProperty;
 var M5 = (a, n, t) =>
   n in a

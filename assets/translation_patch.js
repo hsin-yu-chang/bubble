@@ -3873,7 +3873,7 @@ const translations = {
   "새벽이 아니라": "不是凌晨"
 };
 
-const DERBY_NAME_PATCH = "신유";
+const DERBY_NAME_PATCH = "yuki";
 
 function normalizeText(str) {
   return String(str)
